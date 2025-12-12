@@ -1,3 +1,4 @@
+import 'package:bio_secure/presentation/biometric_setup_screen.dart';
 import 'package:flutter/material.dart';
 
 /// Login screen ("Login screen") matching the provided design.
@@ -145,7 +146,7 @@ class LoginScreen extends StatelessWidget {
 												height: 58,
 												child: ElevatedButton(
 													onPressed: () {
-														// TODO: wire biometric enabling logic
+														Navigator.push(context, MaterialPageRoute(builder: (context) => const BiometricSetupScreen()));
 													},
 													style: ElevatedButton.styleFrom(
 														backgroundColor: const Color(0xFFFF7A00),
