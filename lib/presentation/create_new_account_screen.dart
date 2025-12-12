@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'bottom_navigation_screen.dart';
 
 /// Screen that asks the user to provide a PIN or a username.
@@ -24,11 +25,6 @@ class _CreateNewAccountScreenState extends State<CreateNewAccountScreen> {
     return _pinController.text.trim().isNotEmpty || _usernameController.text.trim().isNotEmpty;
   }
 
-  bool get _pinsMatch {
-    if (_pinController.text.isEmpty && _confirmPinController.text.isEmpty) return true;
-    return _pinController.text == _confirmPinController.text;
-  }
-
   @override
   void dispose() {
     _pinController.dispose();
@@ -37,7 +33,7 @@ class _CreateNewAccountScreenState extends State<CreateNewAccountScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  void _submit() async {
     if (!_canSubmit) {
       // show a small error
       ScaffoldMessenger.of(context).showSnackBar(
@@ -53,11 +49,31 @@ class _CreateNewAccountScreenState extends State<CreateNewAccountScreen> {
       return;
     }
 
-    // Here you would normally persist the PIN/username securely.
-    // For now we navigate to the BottomNavigationScreen.
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const BottomNavigationScreen()),
-    );
+    // Save PIN and username to secure storage
+    const storage = FlutterSecureStorage();
+    
+    try {
+      if (_pinController.text.isNotEmpty) {
+        await storage.write(key: 'user_pin', value: _pinController.text);
+      }
+      
+      if (_usernameController.text.isNotEmpty) {
+        await storage.write(key: 'username', value: _usernameController.text);
+      }
+
+      // Navigate to BottomNavigationScreen after successful save
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const BottomNavigationScreen()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving data: $e')),
+        );
+      }
+    }
   }
 
   @override
