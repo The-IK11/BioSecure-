@@ -57,8 +57,8 @@ class _BiometricSetupScreenState extends State<BiometricSetupScreen> {
       });
       return;
     }
- await _authStorage.write(key:_biometricEnabledKey , value: 'true');
- await _authStorage.write(key:_biometricPinKey , value: _pinController.text);
+ //await _authStorage.write(key:_biometricEnabledKey , value: 'true');
+ ///await _authStorage.write(key:_biometricPinKey , value: _pinController.text);
     // Show loading state
     setState(() => _isLoading = true);
 

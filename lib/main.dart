@@ -1,4 +1,5 @@
 import 'package:bio_secure/presentation/bottom_navigation_screen.dart';
+import 'package:bio_secure/presentation/create_new_account_screen.dart';
 import 'package:bio_secure/presentation/login_screen.dart';
 import 'package:bio_secure/presentation/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
 
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home:const SplashScreen(),
+      home:CreateNewAccountScreen()
     );
   }
 }
