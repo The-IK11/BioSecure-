@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bio_secure/presentation/bottom_navigation_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// BiometricSetupScreen - allows user to set biometric lock with PIN confirmation
-///
-/// - Two PIN input fields (first PIN and confirm PIN)
-/// - Biometric setup instructions
-/// - Finger icon submit button
-/// - On successful PIN match, navigates to BottomNavigationScreen
 class BiometricSetupScreen extends StatefulWidget {
   const BiometricSetupScreen({super.key});
 
@@ -19,11 +14,14 @@ class _BiometricSetupScreenState extends State<BiometricSetupScreen> {
   final TextEditingController _confirmPinController = TextEditingController();
   final FocusNode _pinFocus = FocusNode();
   final FocusNode _confirmPinFocus = FocusNode();
-
+  final _authStorage= FlutterSecureStorage();
+ 
   bool _showPinError = false;
   bool _showConfirmPinError = false;
   String _errorMessage = '';
   bool _isLoading = false;
+ static const   String _biometricEnabledKey='biometric_enabled';
+ static const   String _biometricPinKey='biometric_pin';
 
   @override
   void dispose() {
@@ -34,11 +32,12 @@ class _BiometricSetupScreenState extends State<BiometricSetupScreen> {
     super.dispose();
   }
 
-  void _handleSubmit() {
+  void _handleSubmit()async {
     setState(() {
       _showPinError = _pinController.text.isEmpty;
       _showConfirmPinError = _confirmPinController.text.isEmpty;
       _errorMessage = '';
+
     });
 
     if (_showPinError || _showConfirmPinError) {
@@ -58,7 +57,8 @@ class _BiometricSetupScreenState extends State<BiometricSetupScreen> {
       });
       return;
     }
-
+ await _authStorage.write(key:_biometricEnabledKey , value: 'true');
+ await _authStorage.write(key:_biometricPinKey , value: _pinController.text);
     // Show loading state
     setState(() => _isLoading = true);
 
