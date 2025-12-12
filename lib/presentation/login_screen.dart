@@ -1,4 +1,5 @@
 import 'package:bio_secure/presentation/biometric_setup_screen.dart';
+import 'package:bio_secure/presentation/create_new_account_screen.dart';
 import 'package:flutter/material.dart';
 
 /// Login screen ("Login screen") matching the provided design.
@@ -181,6 +182,28 @@ class LoginScreen extends StatelessWidget {
 														),
 													),
 													child: const Text('Use PIN Instead', style: TextStyle(color: Colors.white)),
+												),
+											),
+
+											const SizedBox(height: 16),
+
+											SizedBox(
+												height: 56,
+												child: ElevatedButton(
+													onPressed: () {
+														Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateNewAccountScreen()));
+													},
+													style: ElevatedButton.styleFrom(
+														backgroundColor: const Color.fromRGBO(139,69,19,0.48),
+														shape: const StadiumBorder(),
+														elevation: 2,
+														shadowColor: Colors.black45,
+														textStyle: const TextStyle(
+															fontSize: 16,
+															fontWeight: FontWeight.w600,
+														),
+													),
+													child: const Text('Create Account', style: TextStyle(color: Colors.white)),
 												),
 											),
 

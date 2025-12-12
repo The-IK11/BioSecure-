@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bio_secure/presentation/bottom_navigation_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:local_auth/local_auth.dart';
 
 class BiometricSetupScreen extends StatefulWidget {
   const BiometricSetupScreen({super.key});
@@ -15,10 +16,12 @@ class _BiometricSetupScreenState extends State<BiometricSetupScreen> {
   final FocusNode _pinFocus = FocusNode();
   final FocusNode _confirmPinFocus = FocusNode();
   final _authStorage= FlutterSecureStorage();
+  final LocalAuthentication localAuthentication=LocalAuthentication();
  
   bool _showPinError = false;
   bool _showConfirmPinError = false;
   String _errorMessage = '';
+
   bool _isLoading = false;
  static const   String _biometricEnabledKey='biometric_enabled';
  static const   String _biometricPinKey='biometric_pin';
@@ -74,7 +77,50 @@ class _BiometricSetupScreenState extends State<BiometricSetupScreen> {
       }
     });
   }
+///Biometric funtionality 
+///Check Biometric Environment on device 
+Future<bool> checkBiometricSupport() async {
+  try{
+    final isAvailable=await localAuthentication.canCheckBiometrics;
+    final isDeviceSupported=await localAuthentication.isDeviceSupported();
+    return isAvailable && isDeviceSupported;
+  }
+  catch(e){
+    return false;
+}
+}
+//Biometric Authentication function
 
+Future<void> _authenticateUser() async {
+
+bool isAvailable=await checkBiometricSupport();
+if(!isAvailable){
+  setState(() {
+    _errorMessage='Biometric authentication is not available on this device.';
+  });
+  try{
+    final bool didAuthenticate=await localAuthentication.authenticate(
+      localizedReason: 'Please authenticate to enable biometric login',
+      biometricOnly: true
+      
+    );
+
+      if (didAuthenticate) {
+        setState(() {
+          _errorMessage = "Unlocked Successfully ✔";
+        });
+      } else {
+        setState(() {
+          _errorMessage = "Failed 😢 — Try Again";
+        });
+      }
+  }
+  catch(e){
+    setState(() {
+      _errorMessage='An error occurred during biometric authentication.';
+    });
+  }
+}}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
