@@ -1,5 +1,5 @@
 package com.example.bio_secure
 
-import io.flutter.embedding.android.FlutterFragmentActivity
+import io.flutter.embedding.android.FlutterActivity
 
-class MainActivity : FlutterFragmentActivity()
+class MainActivity : FlutterActivity()

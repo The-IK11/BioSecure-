@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'bottom_navigation_screen.dart';
+import 'biometric_setup_screen.dart';
 
 /// Screen that asks the user to provide a PIN or a username.
 ///
@@ -61,10 +61,10 @@ class _CreateNewAccountScreenState extends State<CreateNewAccountScreen> {
         await storage.write(key: 'username', value: _usernameController.text);
       }
 
-      // Navigate to BottomNavigationScreen after successful save
+      // Navigate to BiometricSetupScreen after successful save
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const BottomNavigationScreen()),
+          MaterialPageRoute(builder: (_) => const BiometricSetupScreen()),
         );
       }
     } catch (e) {
@@ -113,7 +113,23 @@ class _CreateNewAccountScreenState extends State<CreateNewAccountScreen> {
                 ),
 
                 const SizedBox(height: 28),
-
+ // Username field
+                TextFormField(
+                  controller: _usernameController,
+                  keyboardType: TextInputType.text,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: 'Username',
+                    labelStyle: const TextStyle(color: Color.fromRGBO(210, 180, 150, 0.9)),
+                    hintText: 'Enter a username',
+                    hintStyle: const TextStyle(color: Color.fromRGBO(180, 160, 140, 0.7)),
+                    filled: true,
+                    fillColor: const Color.fromRGBO(0, 0, 0, 0.18),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  ),
+                  onChanged: (_) => setState(() {}),
+                ),
+   const SizedBox(height: 16),
                 // PIN field
                 TextFormField(
                   controller: _pinController,
@@ -156,25 +172,9 @@ class _CreateNewAccountScreenState extends State<CreateNewAccountScreen> {
                   onChanged: (_) => setState(() {}),
                 ),
 
-                const SizedBox(height: 16),
+             
 
-                // Username field
-                TextFormField(
-                  controller: _usernameController,
-                  keyboardType: TextInputType.text,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: 'Username',
-                    labelStyle: const TextStyle(color: Color.fromRGBO(210, 180, 150, 0.9)),
-                    hintText: 'Enter a username',
-                    hintStyle: const TextStyle(color: Color.fromRGBO(180, 160, 140, 0.7)),
-                    filled: true,
-                    fillColor: const Color.fromRGBO(0, 0, 0, 0.18),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  ),
-                  onChanged: (_) => setState(() {}),
-                ),
-
+               
                 const SizedBox(height: 24),
 
                 // Helper text

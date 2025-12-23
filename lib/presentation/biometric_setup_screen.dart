@@ -11,46 +11,38 @@ class BiometricSetupScreen extends StatefulWidget {
 }
 
 class _BiometricSetupScreenState extends State<BiometricSetupScreen> {
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _pinController = TextEditingController();
-  final TextEditingController _confirmPinController = TextEditingController();
+  final FocusNode _usernameFocus = FocusNode();
   final FocusNode _pinFocus = FocusNode();
-  final FocusNode _confirmPinFocus = FocusNode();
   final _authStorage= FlutterSecureStorage();
   final LocalAuthentication localAuthentication=LocalAuthentication();
  
+  bool _showUsernameError = false;
   bool _showPinError = false;
-  bool _showConfirmPinError = false;
   String _errorMessage = '';
 
   bool _isLoading = false;
  static const   String _biometricEnabledKey='biometric_enabled';
  static const   String _biometricPinKey='biometric_pin';
-
+static const   String _biometricUserNameKey='biometric_username';
   @override
   void dispose() {
+    _usernameController.dispose();
     _pinController.dispose();
-    _confirmPinController.dispose();
+    _usernameFocus.dispose();
     _pinFocus.dispose();
-    _confirmPinFocus.dispose();
     super.dispose();
   }
 
-  void _handleSubmit()async {
+  void _handleSubmit() async {
     setState(() {
+      _showUsernameError = _usernameController.text.isEmpty;
       _showPinError = _pinController.text.isEmpty;
-      _showConfirmPinError = _confirmPinController.text.isEmpty;
       _errorMessage = '';
-
     });
 
-    if (_showPinError || _showConfirmPinError) {
-      return;
-    }
-
-    if (_pinController.text != _confirmPinController.text) {
-      setState(() {
-        _errorMessage = 'PINs do not match. Please try again.';
-      });
+    if (_showUsernameError || _showPinError) {
       return;
     }
 
@@ -60,22 +52,73 @@ class _BiometricSetupScreenState extends State<BiometricSetupScreen> {
       });
       return;
     }
- //await _authStorage.write(key:_biometricEnabledKey , value: 'true');
- ///await _authStorage.write(key:_biometricPinKey , value: _pinController.text);
+
     // Show loading state
     setState(() => _isLoading = true);
 
-    // Simulate biometric setup delay
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        // Navigate to BottomNavigationScreen on success
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const BottomNavigationScreen(),
-          ),
-        );
+    try {
+      // Retrieve saved credentials from secure storage
+      final savedUsername = await _authStorage.read(key: 'username');
+      final savedPin = await _authStorage.read(key: 'user_pin');
+
+      // Validate credentials
+      if (savedUsername != _usernameController.text || savedPin != _pinController.text) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Invalid username or PIN. Please try again.';
+        });
+        return;
       }
-    });
+
+      // Check biometric support
+      final isBiometricAvailable = await checkBiometricSupport();
+      if (!isBiometricAvailable) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Biometric authentication is not available on this device.';
+        });
+        return;
+      }
+
+      // Trigger biometric authentication to enable it
+      final bool didAuthenticate = await localAuthentication.authenticate(
+        localizedReason: 'Authenticate to enable biometric login',
+        biometricOnly: true,
+      );
+
+      if (didAuthenticate) {
+        // Save biometric enabled status
+        await _authStorage.write(key: _biometricEnabledKey, value: 'true');
+        await _authStorage.write(key: _biometricPinKey, value: _pinController.text);
+        await _authStorage.write(key: _biometricUserNameKey, value: _usernameController.text);
+
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Biometric login enabled successfully! ✔';
+        });
+
+        // Navigate to BottomNavigationScreen on success
+        Future.delayed(const Duration(seconds: 1), () {
+          if (mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const BottomNavigationScreen(),
+              ),
+            );
+          }
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Biometric authentication failed. Please try again.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Error: ${e.toString()}';
+      });
+    }
   }
 ///Biometric funtionality 
 ///Check Biometric Environment on device 
@@ -89,38 +132,7 @@ Future<bool> checkBiometricSupport() async {
     return false;
 }
 }
-//Biometric Authentication function
 
-Future<void> _authenticateUser() async {
-
-bool isAvailable=await checkBiometricSupport();
-if(!isAvailable){
-  setState(() {
-    _errorMessage='Biometric authentication is not available on this device.';
-  });
-  try{
-    final bool didAuthenticate=await localAuthentication.authenticate(
-      localizedReason: 'Please authenticate to enable biometric login',
-      biometricOnly: true
-      
-    );
-
-      if (didAuthenticate) {
-        setState(() {
-          _errorMessage = "Unlocked Successfully ✔";
-        });
-      } else {
-        setState(() {
-          _errorMessage = "Failed 😢 — Try Again";
-        });
-      }
-  }
-  catch(e){
-    setState(() {
-      _errorMessage='An error occurred during biometric authentication.';
-    });
-  }
-}}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -177,23 +189,23 @@ if(!isAvailable){
 
                 const SizedBox(height: 40),
 
-                // First PIN Input
+                // Username Input
+                _buildTextInputField(
+                  controller: _usernameController,
+                  focusNode: _usernameFocus,
+                  label: 'Username',
+                  hasError: _showUsernameError,
+                  onFieldSubmitted: (_) => _pinFocus.requestFocus(),
+                ),
+
+                const SizedBox(height: 24),
+
+                // PIN Input
                 _buildPinInputField(
                   controller: _pinController,
                   focusNode: _pinFocus,
                   label: 'Enter PIN',
                   hasError: _showPinError,
-                  onFieldSubmitted: (_) => _confirmPinFocus.requestFocus(),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Confirm PIN Input
-                _buildPinInputField(
-                  controller: _confirmPinController,
-                  focusNode: _confirmPinFocus,
-                  label: 'Confirm PIN',
-                  hasError: _showConfirmPinError,
                   onFieldSubmitted: (_) => _handleSubmit(),
                 ),
 
@@ -331,6 +343,72 @@ if(!isAvailable){
           ),
         ),
         counterText: '',
+        suffixIcon: hasError
+            ? const Icon(
+                Icons.error_outline,
+                color: Color.fromRGBO(255, 100, 100, 0.8),
+              )
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildTextInputField({
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required String label,
+    required bool hasError,
+    required Function(String) onFieldSubmitted,
+  }) {
+    return TextFormField(
+      controller: controller,
+      focusNode: focusNode,
+      keyboardType: TextInputType.text,
+      onFieldSubmitted: onFieldSubmitted,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+      ),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(
+          color: hasError
+              ? const Color.fromRGBO(255, 100, 100, 0.8)
+              : const Color.fromRGBO(210, 180, 150, 0.7),
+        ),
+        hintStyle: const TextStyle(
+          color: Color.fromRGBO(210, 180, 150, 0.5),
+        ),
+        filled: true,
+        fillColor: const Color.fromRGBO(0, 0, 0, 0.15),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: Color.fromRGBO(210, 180, 150, 0.3),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: Color.fromRGBO(255, 122, 0, 0.7),
+            width: 2,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: hasError
+                ? const Color.fromRGBO(255, 0, 0, 0.3)
+                : const Color.fromRGBO(210, 180, 150, 0.2),
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: Color.fromRGBO(255, 0, 0, 0.5),
+          ),
+        ),
         suffixIcon: hasError
             ? const Icon(
                 Icons.error_outline,

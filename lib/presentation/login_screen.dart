@@ -1,16 +1,80 @@
-import 'package:bio_secure/presentation/biometric_setup_screen.dart';
 import 'package:bio_secure/presentation/create_new_account_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'bottom_navigation_screen.dart';
 
-/// Login screen ("Login screen") matching the provided design.
-///
-/// - Dark brown gradient background with subtle radial glows
-/// - Center fingerprint circle with glow
-/// - Title "BioSecure" and subtitle
-/// - Primary orange rounded button: "Enable Biometric Login"
-/// - Secondary muted rounded button: "Use PIN Instead"
-class LoginScreen extends StatelessWidget {
+/// Login screen with biometric authentication support.
+class LoginScreen extends StatefulWidget {
 	const LoginScreen({super.key});
+
+	@override
+	State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+	final LocalAuthentication _localAuth = LocalAuthentication();
+	final FlutterSecureStorage _storage = const FlutterSecureStorage();
+	bool _isBiometricAvailable = false;
+	bool _isAuthenticating = false;
+
+	@override
+	void initState() {
+		super.initState();
+		_checkBiometricAvailability();
+	}
+
+	Future<void> _checkBiometricAvailability() async {
+		try {
+			final isBiometricEnabled = await _storage.read(key: 'biometric_enabled');
+			final isAvailable = await _localAuth.canCheckBiometrics;
+			final isDeviceSupported = await _localAuth.isDeviceSupported();
+
+			setState(() {
+				_isBiometricAvailable = isAvailable && isDeviceSupported && isBiometricEnabled == 'true';
+			});
+		} catch (e) {
+			setState(() {
+				_isBiometricAvailable = false;
+			});
+		}
+	}
+
+	Future<void> _handleBiometricLogin() async {
+		if (!_isBiometricAvailable) {
+			ScaffoldMessenger.of(context).showSnackBar(
+				const SnackBar(content: Text('Biometric authentication not available')),
+			);
+			return;
+		}
+
+		setState(() => _isAuthenticating = true);
+
+		try {
+			final bool authenticated = await _localAuth.authenticate(
+				localizedReason: 'Authenticate to unlock BioSecure',
+				biometricOnly: true,
+			);
+
+			if (authenticated) {
+				if (mounted) {
+					Navigator.of(context).pushReplacement(
+						MaterialPageRoute(builder: (_) => const BottomNavigationScreen()),
+					);
+				}
+			} else {
+				ScaffoldMessenger.of(context).showSnackBar(
+					const SnackBar(content: Text('Authentication failed')),
+				);
+			}
+		} catch (e) {
+			ScaffoldMessenger.of(context).showSnackBar(
+				SnackBar(content: Text('Error: $e')),
+			);
+		} finally {
+			setState(() => _isAuthenticating = false);
+		}
+	}
 
 	@override
 	Widget build(BuildContext context) {
@@ -146,20 +210,28 @@ class LoginScreen extends StatelessWidget {
 											SizedBox(
 												height: 58,
 												child: ElevatedButton(
-													onPressed: () {
-														Navigator.push(context, MaterialPageRoute(builder: (context) => const BiometricSetupScreen()));
-													},
+													onPressed: _isAuthenticating ? null : _handleBiometricLogin,
 													style: ElevatedButton.styleFrom(
 														backgroundColor: const Color(0xFFFF7A00),
 														shape: const StadiumBorder(),
 														elevation: 8,
 														shadowColor: const Color.fromRGBO(255,122,0,0.45),
+														disabledBackgroundColor: const Color.fromRGBO(255,122,0,0.5),
 														textStyle: const TextStyle(
 															fontSize: 18,
 															fontWeight: FontWeight.w600,
 														),
 													),
-													child: const Text('Enable Biometric Login'),
+													child: _isAuthenticating
+														? const SizedBox(
+															width: 20,
+															height: 20,
+															child: CircularProgressIndicator(
+																strokeWidth: 2,
+																valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+															),
+														)
+														: const Text('Enable Biometric Login'),
 												),
 											),
 
