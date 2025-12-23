@@ -1,4 +1,4 @@
-import 'package:bio_secure/presentation/create_new_account_screen.dart';
+import 'package:bio_secure/presentation/pages_without_statemanagement/create_new_account_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -105,12 +105,12 @@ class _LoginScreenState extends State<LoginScreen> {
 						child: Container(
 							width: size.width * 0.8,
 							height: size.width * 0.8,
-											decoration: BoxDecoration(
-											shape: BoxShape.circle,
-											gradient: const RadialGradient(
-												colors: [Color.fromRGBO(255,122,0,0.12), Colors.transparent],
-											),
-										),
+							decoration: BoxDecoration(
+								shape: BoxShape.circle,
+								gradient: const RadialGradient(
+									colors: [Color.fromRGBO(255,122,0,0.12), Colors.transparent],
+								),
+							),
 						),
 					),
 
@@ -121,12 +121,12 @@ class _LoginScreenState extends State<LoginScreen> {
 						child: Container(
 							width: size.width * 1.1,
 							height: size.width * 1.1,
-											decoration: BoxDecoration(
-											shape: BoxShape.circle,
-											gradient: const RadialGradient(
-												colors: [Color.fromRGBO(139,69,19,0.18), Colors.transparent],
-											),
-										),
+							decoration: BoxDecoration(
+								shape: BoxShape.circle,
+								gradient: const RadialGradient(
+									colors: [Color.fromRGBO(139,69,19,0.18), Colors.transparent],
+								),
+							),
 						),
 					),
 
@@ -151,28 +151,28 @@ class _LoginScreenState extends State<LoginScreen> {
 														shape: BoxShape.circle,
 														color: const Color.fromRGBO(0, 0, 0, 0.18),
 														border: Border.all(color: Colors.white24, width: 1),
-														boxShadow: [
+														boxShadow: const [
 															// soft inner glow
-																							const BoxShadow(
-																								color: Color.fromRGBO(255,122,0,0.08),
-																								blurRadius: 28,
-																								spreadRadius: 2,
-																							),
+															BoxShadow(
+																color: Color.fromRGBO(255,122,0,0.08),
+																blurRadius: 28,
+																spreadRadius: 2,
+															),
 															// subtle outer shadow
-																							const BoxShadow(
-																								color: Color.fromRGBO(0, 0, 0, 0.6),
-																								blurRadius: 18,
-																								offset: Offset(0, 6),
-																							),
+															BoxShadow(
+																color: Color.fromRGBO(0, 0, 0, 0.6),
+																blurRadius: 18,
+																offset: Offset(0, 6),
+															),
 														],
 													),
-																				child: Center(
-																				child: Icon(
-																					Icons.fingerprint,
-																					size: 56,
-																					color: Color.fromRGBO(255, 255, 255, 0.95),
-																				),
-																			),
+													child: const Center(
+														child: Icon(
+															Icons.fingerprint,
+															size: 56,
+															color: Color.fromRGBO(255, 255, 255, 0.95),
+														),
+													),
 												),
 
 												const SizedBox(height: 26),
@@ -190,15 +190,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
 												const SizedBox(height: 12),
 
-																		Text(
-																			'Unlock Smarter. Unlock Secure.',
-																			textAlign: TextAlign.center,
-																			style: const TextStyle(
-																				color: Color.fromRGBO(255, 255, 255, 0.75),
-																				fontSize: 16,
-																				fontWeight: FontWeight.w400,
-																			),
-																		),
+												const Text(
+													'Unlock Smarter. Unlock Secure.',
+													textAlign: TextAlign.center,
+													style: TextStyle(
+														color: Color.fromRGBO(255, 255, 255, 0.75),
+														fontSize: 16,
+														fontWeight: FontWeight.w400,
+													),
+												),
 											],
 										),
 									),

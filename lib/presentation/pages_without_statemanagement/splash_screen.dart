@@ -1,4 +1,4 @@
-import 'package:bio_secure/presentation/login_screen.dart';
+import 'package:bio_secure/presentation/pages_without_statemanagement/login_screen.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -37,8 +37,6 @@ class _SplashScreenState extends State<SplashScreen>
     // Simulate app initialization and navigate after splash
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
-
-
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => const LoginScreen(),
@@ -135,18 +133,18 @@ class _SplashScreenState extends State<SplashScreen>
                                 color: const Color.fromRGBO(255, 122, 0, 0.3),
                                 width: 2,
                               ),
-                              boxShadow: [
+                              boxShadow: const [
                                 // Outer glow
                                 BoxShadow(
-                                  color: const Color.fromRGBO(255, 122, 0, 0.15),
+                                  color: Color.fromRGBO(255, 122, 0, 0.15),
                                   blurRadius: 40,
                                   spreadRadius: 8,
                                 ),
                                 // Outer shadow
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.3),
+                                  color: Color.fromRGBO(0, 0, 0, 0.3),
                                   blurRadius: 20,
-                                  offset: const Offset(0, 8),
+                                  offset: Offset(0, 8),
                                 ),
                               ],
                             ),

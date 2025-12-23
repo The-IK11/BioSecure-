@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:bio_secure/presentation/bottom_navigation_screen.dart';
+import 'package:bio_secure/presentation/pages_without_statemanagement/bottom_navigation_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 
@@ -15,17 +15,18 @@ class _BiometricSetupScreenState extends State<BiometricSetupScreen> {
   final TextEditingController _pinController = TextEditingController();
   final FocusNode _usernameFocus = FocusNode();
   final FocusNode _pinFocus = FocusNode();
-  final _authStorage= FlutterSecureStorage();
-  final LocalAuthentication localAuthentication=LocalAuthentication();
+  final _authStorage = FlutterSecureStorage();
+  final LocalAuthentication localAuthentication = LocalAuthentication();
  
   bool _showUsernameError = false;
   bool _showPinError = false;
   String _errorMessage = '';
 
   bool _isLoading = false;
- static const   String _biometricEnabledKey='biometric_enabled';
- static const   String _biometricPinKey='biometric_pin';
-static const   String _biometricUserNameKey='biometric_username';
+  static const String _biometricEnabledKey = 'biometric_enabled';
+  static const String _biometricPinKey = 'biometric_pin';
+  static const String _biometricUserNameKey = 'biometric_username';
+  
   @override
   void dispose() {
     _usernameController.dispose();
@@ -120,18 +121,17 @@ static const   String _biometricUserNameKey='biometric_username';
       });
     }
   }
-///Biometric funtionality 
-///Check Biometric Environment on device 
-Future<bool> checkBiometricSupport() async {
-  try{
-    final isAvailable=await localAuthentication.canCheckBiometrics;
-    final isDeviceSupported=await localAuthentication.isDeviceSupported();
-    return isAvailable && isDeviceSupported;
+
+  /// Check Biometric Environment on device 
+  Future<bool> checkBiometricSupport() async {
+    try {
+      final isAvailable = await localAuthentication.canCheckBiometrics;
+      final isDeviceSupported = await localAuthentication.isDeviceSupported();
+      return isAvailable && isDeviceSupported;
+    } catch (e) {
+      return false;
+    }
   }
-  catch(e){
-    return false;
-}
-}
 
   @override
   Widget build(BuildContext context) {

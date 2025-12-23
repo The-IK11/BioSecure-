@@ -1,10 +1,13 @@
-import 'package:bio_secure/presentation/bottom_navigation_screen.dart';
-import 'package:bio_secure/presentation/create_new_account_screen.dart';
-import 'package:bio_secure/presentation/login_screen.dart';
-import 'package:bio_secure/presentation/splash_screen.dart';
+import 'package:bio_secure/presentation/pages/splash_screen_refactored.dart';
+import 'package:bio_secure/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:bio_secure/core/utils/service_locator.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Initialize all dependencies
+  await ServiceLocator().init();
   runApp(const MyApp());
 }
 
@@ -14,14 +17,16 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner:false,
-      title: 'BioSecure',
-      theme: ThemeData(
-
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return ChangeNotifierProvider(
+      create: (_) => AuthProvider(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'BioSecure',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        ),
+        home: const SplashScreenRefactored(),
       ),
-      home:LoginScreen()
     );
   }
 }
